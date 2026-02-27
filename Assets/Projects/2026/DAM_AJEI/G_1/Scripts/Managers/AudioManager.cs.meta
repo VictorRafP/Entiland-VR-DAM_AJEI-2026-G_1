@@ -1,0 +1,13 @@
+fileFormatVersion: 2
+guid: bd985d50378c1d24a988eae6b2e8ad55
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - bgmMixer: {fileID: -5744906430684802906, guid: 4a7c85b361a5b8444b04300d6d7eb207, type: 2}
+  - sfxMixer: {fileID: 5892031596332789687, guid: 4a7c85b361a5b8444b04300d6d7eb207, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
