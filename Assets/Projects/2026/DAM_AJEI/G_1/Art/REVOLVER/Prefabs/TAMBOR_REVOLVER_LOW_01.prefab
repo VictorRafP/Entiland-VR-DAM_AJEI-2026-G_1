@@ -22,15 +22,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: 0.000014051446
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.00011
+      value: -0.00092290976
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -0.009112999
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalRotation.w
@@ -38,7 +38,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 2.526175e-10
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalRotation.y
@@ -46,7 +46,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: -0.0000000037167158
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -60,6 +60,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 1586402a19c553143a0d3e78ba654ee7, type: 2}
     - target: {fileID: 919132149155446097, guid: 714785c44bc796c41ba327286a35d9ae, type: 3}
       propertyPath: m_Name
       value: TAMBOR_REVOLVER_LOW_01
@@ -142,7 +146,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2012224284487719838, guid: 8e3a4582435af374e874edaa315979dd, type: 3}
       propertyPath: m_Name
-      value: BALA_REVOLVER_LOW_01
+      value: Bala 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -204,7 +208,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2012224284487719838, guid: 8e3a4582435af374e874edaa315979dd, type: 3}
       propertyPath: m_Name
-      value: BALA_REVOLVER_LOW_06
+      value: Bala 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -266,7 +270,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2012224284487719838, guid: 8e3a4582435af374e874edaa315979dd, type: 3}
       propertyPath: m_Name
-      value: BALA_REVOLVER_LOW_07
+      value: Bala 4
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -328,7 +332,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2012224284487719838, guid: 8e3a4582435af374e874edaa315979dd, type: 3}
       propertyPath: m_Name
-      value: BALA_REVOLVER_LOW_04
+      value: Bala 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -390,7 +394,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2012224284487719838, guid: 8e3a4582435af374e874edaa315979dd, type: 3}
       propertyPath: m_Name
-      value: BALA_REVOLVER_LOW_05
+      value: Bala 5
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -452,7 +456,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2012224284487719838, guid: 8e3a4582435af374e874edaa315979dd, type: 3}
       propertyPath: m_Name
-      value: BALA_REVOLVER_LOW
+      value: Bala
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

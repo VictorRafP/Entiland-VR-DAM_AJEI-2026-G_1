@@ -1,12 +1,9 @@
 using UnityEngine;
-using Autohand;
 
 namespace Entiland_VR_DAM_AJEI_2026_G_1
 {
     /// <summary>
-    /// Controla el tambor del revólver:
-    /// estado de munición, balas visuales, apertura/cierre, recarga por trigger
-    /// y giro del tambor por disparo sobre CylinderSpin.
+    /// Controla el tambor del revólver, su posicion y cuando esta cargado o no
     /// </summary>
     public class RevolverCylinder : MonoBehaviour
     {
@@ -16,55 +13,55 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         [Header("Reload")]
         [SerializeField] private Collider reloadTrigger;
 
-        [Header("Cylinder Open Rotation")]
-        [SerializeField] private float closedLocalY = 0f;
-        [SerializeField] private float openedLocalY = -16f;
-        [SerializeField] private float openRotationSpeed = 180f;
+        [Header("Open / Closed Poses")]
+        [SerializeField] private Transform closedPose;
+        [SerializeField] private Transform openPose;
+        [SerializeField] private float poseMoveSpeed = 8f;
+        [SerializeField] private float poseRotateSpeed = 240f;
 
-        [Header("Cylinder Spin")]
+        [Header("Spin Rotation")]
         [SerializeField] private Transform cylinderSpin;
         [SerializeField] private float spinStepAngle = 58.8f;
-        [SerializeField] private float spinRotationSpeed = 360f;
+        [SerializeField] private float spinRotationSpeed = 240f;
 
         [Header("Ammo")]
         [SerializeField] private bool startFull = true;
 
         private readonly bool[] loadedChambers = new bool[6];
 
-        private Rigidbody[] visualBulletBodies;
-        private Collider[][] visualBulletColliders;
-        private Grabbable[] visualBulletGrabbables;
-
         private bool isOpenRequested = false;
         private bool isFullyOpen = false;
         private bool isFullyClosed = true;
 
-        private float currentSpinLocalY = 0f;
         private float targetSpinLocalY = 0f;
         private bool isSpinInProgress = false;
 
         private int currentChamberIndex = 0;
 
+        /// <summary>
+        /// Indica si tambor abierto
+        /// </summary>
         public bool IsOpen
         {
             get { return isFullyOpen; }
         }
 
+        /// <summary>
+        /// Indica si tambor cerrado
+        /// </summary>
         public bool IsClosed
         {
             get { return isFullyClosed; }
         }
 
-        public bool IsInTransition
+        public bool IsBusy
         {
             get { return !isFullyOpen && !isFullyClosed; }
         }
 
-        public bool IsSpinInProgress
-        {
-            get { return isSpinInProgress; }
-        }
-
+        /// <summary>
+        /// Cantidad actual de balas cargadas
+        /// </summary>
         public int LoadedCount
         {
             get
@@ -85,16 +82,22 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
         private void Awake()
         {
-            CacheVisualBulletComponents();
             InitializeChambers();
             RefreshVisualBullets();
 
             SetReloadTriggerState(false);
-            SetCurrentOpenLocalYRotation(closedLocalY);
 
-            currentSpinLocalY = NormalizeAngle(GetSpinLocalY());
-            targetSpinLocalY = currentSpinLocalY;
-            SetCurrentSpinLocalYRotation(currentSpinLocalY);
+            if (closedPose != null)
+            {
+                transform.localPosition = closedPose.localPosition;
+                transform.localRotation = closedPose.localRotation;
+            }
+
+            if (cylinderSpin != null)
+            {
+                targetSpinLocalY = NormalizeAngle(cylinderSpin.localEulerAngles.y);
+                SetCurrentSpinLocalYRotation(targetSpinLocalY);
+            }
 
             isOpenRequested = false;
             isFullyOpen = false;
@@ -105,10 +108,13 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
         private void FixedUpdate()
         {
-            UpdateCylinderOpenRotation();
-            UpdateCylinderSpinRotation();
+            UpdateOpenPose();
+            UpdateSpinRotation();
         }
 
+        /// <summary>
+        /// Devuelve true si el revolver puede disparar
+        /// </summary>
         public bool CanFire()
         {
             if (!isFullyClosed)
@@ -129,36 +135,33 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             return loadedChambers[currentChamberIndex];
         }
 
+        /// <summary>
+        /// Consume una bala si el revolver puede disparar
+        /// </summary>
         public bool TryConsumeRoundForShot()
         {
-            Debug.Log("RevolverCylinder -> TryConsumeRoundForShot() START | LoadedCount: " + LoadedCount + " | currentChamberIndex: " + currentChamberIndex, this);
-
             if (!CanFire())
             {
-                Debug.Log("RevolverCylinder -> CanFire() FALSE", this);
                 return false;
             }
 
             loadedChambers[currentChamberIndex] = false;
-
-            Debug.Log("RevolverCylinder -> Chamber consumed: " + currentChamberIndex, this);
-
             RefreshVisualBullets();
 
-            AdvanceCylinderSpin();
+            AdvanceSpin();
             AdvanceChamberIndex();
-
-            Debug.Log("RevolverCylinder -> LoadedCount after consume: " + LoadedCount + " | next chamber: " + currentChamberIndex, this);
 
             if (LoadedCount <= 0)
             {
-                Debug.Log("RevolverCylinder -> No ammo left, opening cylinder", this);
                 OpenCylinder();
             }
 
             return true;
         }
 
+        /// <summary>
+        /// Cargar balas
+        /// </summary>
         public void TryInsertRoundFromTrigger(Collider other)
         {
             if (!isFullyOpen)
@@ -185,76 +188,58 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             TryInsertRound(ammoRound);
         }
 
+        /// <summary>
+        /// Apertura del tambor
+        /// </summary>
         public void OpenCylinder()
         {
+            if (IsBusy)
+            {
+                return;
+            }
+
             isOpenRequested = true;
             isFullyClosed = false;
             SetReloadTriggerState(false);
         }
 
+        /// <summary>
+        /// Cerrar tambor, solo cierra si hay al menos una bala cargada
+        /// </summary>
         public void CloseCylinder()
         {
+            if (IsBusy)
+            {
+                return;
+            }
+
+            if (LoadedCount <= 0)
+            {
+                return;
+            }
+
             isOpenRequested = false;
             isFullyOpen = false;
             SetReloadTriggerState(false);
         }
 
+        /// <summary>
+        /// Toggle entre abierto y cerrado
+        /// </summary>
         public void ToggleCylinder()
         {
-            if (isOpenRequested || isFullyOpen)
+            if (IsBusy)
+            {
+                return;
+            }
+
+            if (isFullyOpen)
             {
                 CloseCylinder();
             }
-            else
+            else if (isFullyClosed)
             {
                 OpenCylinder();
-            }
-        }
-
-        public bool HasEmptyChamber()
-        {
-            for (int i = 0; i < loadedChambers.Length; i++)
-            {
-                if (!loadedChambers[i])
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-        public void FillAllChambers()
-        {
-            for (int i = 0; i < loadedChambers.Length; i++)
-            {
-                loadedChambers[i] = true;
-            }
-
-            currentChamberIndex = 0;
-            RefreshVisualBullets();
-            CloseCylinder();
-        }
-
-        private void CacheVisualBulletComponents()
-        {
-            int bulletCount = visualBullets != null ? visualBullets.Length : 0;
-
-            visualBulletBodies = new Rigidbody[bulletCount];
-            visualBulletColliders = new Collider[bulletCount][];
-            visualBulletGrabbables = new Grabbable[bulletCount];
-
-            for (int i = 0; i < bulletCount; i++)
-            {
-                GameObject bullet = visualBullets[i];
-                if (bullet == null)
-                {
-                    continue;
-                }
-
-                visualBulletBodies[i] = bullet.GetComponent<Rigidbody>();
-                visualBulletColliders[i] = bullet.GetComponentsInChildren<Collider>(true);
-                visualBulletGrabbables[i] = bullet.GetComponent<Grabbable>();
             }
         }
 
@@ -266,19 +251,59 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             }
         }
 
-        private void UpdateCylinderOpenRotation()
+        private void RefreshVisualBullets()
         {
-            float currentY = NormalizeAngle(transform.localEulerAngles.y);
-            float targetY = isOpenRequested ? openedLocalY : closedLocalY;
-            float nextY = Mathf.MoveTowardsAngle(currentY, targetY, openRotationSpeed * Time.fixedDeltaTime);
-
-            SetCurrentOpenLocalYRotation(nextY);
-
-            bool reachedTarget = Mathf.Abs(Mathf.DeltaAngle(nextY, targetY)) <= 0.05f;
-
-            if (reachedTarget)
+            if (visualBullets == null)
             {
-                SetCurrentOpenLocalYRotation(targetY);
+                return;
+            }
+
+            int count = visualBullets.Length;
+            if (count > loadedChambers.Length)
+            {
+                count = loadedChambers.Length;
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                if (visualBullets[i] != null)
+                {
+                    visualBullets[i].SetActive(loadedChambers[i]);
+                }
+            }
+        }
+
+        private void UpdateOpenPose()
+        {
+            Transform targetPose = isOpenRequested ? openPose : closedPose;
+            if (targetPose == null)
+            {
+                return;
+            }
+
+            Vector3 currentPosition = transform.localPosition;
+            Quaternion currentRotation = transform.localRotation;
+
+            Vector3 nextPosition = Vector3.MoveTowards(
+                currentPosition,
+                targetPose.localPosition,
+                poseMoveSpeed * Time.fixedDeltaTime);
+
+            Quaternion nextRotation = Quaternion.RotateTowards(
+                currentRotation,
+                targetPose.localRotation,
+                poseRotateSpeed * Time.fixedDeltaTime);
+
+            transform.localPosition = nextPosition;
+            transform.localRotation = nextRotation;
+
+            bool reachedPosition = Vector3.Distance(nextPosition, targetPose.localPosition) <= 0.0005f;
+            bool reachedRotation = Quaternion.Angle(nextRotation, targetPose.localRotation) <= 0.05f;
+
+            if (reachedPosition && reachedRotation)
+            {
+                transform.localPosition = targetPose.localPosition;
+                transform.localRotation = targetPose.localRotation;
 
                 if (isOpenRequested)
                 {
@@ -301,16 +326,16 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             }
         }
 
-        private void UpdateCylinderSpinRotation()
+        private void UpdateSpinRotation()
         {
             if (cylinderSpin == null)
             {
                 return;
             }
 
-            currentSpinLocalY = NormalizeAngle(GetSpinLocalY());
+            float currentSpinY = NormalizeAngle(cylinderSpin.localEulerAngles.y);
             float nextSpinY = Mathf.MoveTowardsAngle(
-                currentSpinLocalY,
+                currentSpinY,
                 targetSpinLocalY,
                 spinRotationSpeed * Time.fixedDeltaTime);
 
@@ -329,7 +354,7 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             }
         }
 
-        private void AdvanceCylinderSpin()
+        private void AdvanceSpin()
         {
             if (cylinderSpin == null)
             {
@@ -369,68 +394,10 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 ammoRound.Consume();
                 RefreshVisualBullets();
 
-                if (!HasEmptyChamber())
-                {
-                    CloseCylinder();
-                }
-
                 return true;
             }
 
             return false;
-        }
-
-        private void RefreshVisualBullets()
-        {
-            if (visualBullets == null)
-            {
-                return;
-            }
-
-            int count = visualBullets.Length;
-            if (count > loadedChambers.Length)
-            {
-                count = loadedChambers.Length;
-            }
-
-            for (int i = 0; i < count; i++)
-            {
-                GameObject bullet = visualBullets[i];
-                if (bullet == null)
-                {
-                    continue;
-                }
-
-                bool isLoaded = loadedChambers[i];
-                bullet.SetActive(isLoaded);
-
-                Rigidbody bulletBody = visualBulletBodies != null && i < visualBulletBodies.Length ? visualBulletBodies[i] : null;
-                if (bulletBody != null)
-                {
-                    bulletBody.isKinematic = true;
-                    bulletBody.useGravity = false;
-                    bulletBody.linearVelocity = Vector3.zero;
-                    bulletBody.angularVelocity = Vector3.zero;
-                }
-
-                Grabbable bulletGrabbable = visualBulletGrabbables != null && i < visualBulletGrabbables.Length ? visualBulletGrabbables[i] : null;
-                if (bulletGrabbable != null)
-                {
-                    bulletGrabbable.enabled = false;
-                }
-
-                Collider[] bulletColliderArray = visualBulletColliders != null && i < visualBulletColliders.Length ? visualBulletColliders[i] : null;
-                if (bulletColliderArray != null)
-                {
-                    for (int colliderIndex = 0; colliderIndex < bulletColliderArray.Length; colliderIndex++)
-                    {
-                        if (bulletColliderArray[colliderIndex] != null)
-                        {
-                            bulletColliderArray[colliderIndex].enabled = false;
-                        }
-                    }
-                }
-            }
         }
 
         private void SetReloadTriggerState(bool enabledState)
@@ -441,23 +408,6 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             }
 
             reloadTrigger.enabled = enabledState;
-        }
-
-        private void SetCurrentOpenLocalYRotation(float localY)
-        {
-            Vector3 localEuler = transform.localEulerAngles;
-            localEuler.y = localY;
-            transform.localEulerAngles = localEuler;
-        }
-
-        private float GetSpinLocalY()
-        {
-            if (cylinderSpin == null)
-            {
-                return 0f;
-            }
-
-            return cylinderSpin.localEulerAngles.y;
         }
 
         private void SetCurrentSpinLocalYRotation(float localY)

@@ -1,0 +1,5 @@
+D:/Omar/Estudis/VIOD/2n/Unity/Entiland-VR-DAM_AJEI-2026-G_1/.utmp/RelWithDebInfo/6i354u6p/arm64-v8a/CMakeFiles/edit_cache.dir
+D:/Omar/Estudis/VIOD/2n/Unity/Entiland-VR-DAM_AJEI-2026-G_1/.utmp/RelWithDebInfo/6i354u6p/arm64-v8a/CMakeFiles/rebuild_cache.dir
+D:/Omar/Estudis/VIOD/2n/Unity/Entiland-VR-DAM_AJEI-2026-G_1/.utmp/RelWithDebInfo/6i354u6p/arm64-v8a/FramePacing/CMakeFiles/swappywrapper.dir
+D:/Omar/Estudis/VIOD/2n/Unity/Entiland-VR-DAM_AJEI-2026-G_1/.utmp/RelWithDebInfo/6i354u6p/arm64-v8a/FramePacing/CMakeFiles/edit_cache.dir
+D:/Omar/Estudis/VIOD/2n/Unity/Entiland-VR-DAM_AJEI-2026-G_1/.utmp/RelWithDebInfo/6i354u6p/arm64-v8a/FramePacing/CMakeFiles/rebuild_cache.dir
