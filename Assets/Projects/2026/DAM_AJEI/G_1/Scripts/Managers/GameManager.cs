@@ -21,5 +21,5 @@ namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
             totalLives += lives;
             livesText.text = "Lives: " + totalLives;
         }
-    }
+	}
 }

@@ -46,25 +46,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmClipList:
-  - {fileID: 8300000, guid: fe58e9415147c2e4c9ce46b4f894e776, type: 3}
-  - {fileID: 8300000, guid: ed91a593e34d26d42b3e2d9dfdbb2158, type: 3}
-  - {fileID: 8300000, guid: dcd460e99f45cb0408bacaf791b2726e, type: 3}
+  - {fileID: 8300000, guid: 57996064e364241489c9b705f5a883f1, type: 3}
+  - {fileID: 8300000, guid: a01e0b14766efeb48bb16ad04d259d8d, type: 3}
   - {fileID: 0}
   sfxClipList:
-  - {fileID: 8300000, guid: dfefb550e229824488dbf5707c8259af, type: 3}
-  - {fileID: 8300000, guid: 2bede12c5f9f60344bd0586676048509, type: 3}
-  - {fileID: 8300000, guid: 07c0e592139ed7d45b1f8d7b8acadc93, type: 3}
-  - {fileID: 8300000, guid: da33f0bd094db3748954512688a3abd1, type: 3}
-  - {fileID: 8300000, guid: 91482358841b12849beb3b967ab6c905, type: 3}
-  - {fileID: 8300000, guid: 6b40d0436ee6df44cb3741baebec793a, type: 3}
-  - {fileID: 8300000, guid: be66f9b5feeb9c047a06f8e3e8f3b75c, type: 3}
+  - {fileID: 8300000, guid: 43747c728b195e54bafb6f2464dce582, type: 3}
+  - {fileID: 8300000, guid: 2f8a6f8d6ee932141976a827e7c5fc1e, type: 3}
+  - {fileID: 8300000, guid: 49cd166ae4b2b344483793718f9ebea2, type: 3}
+  - {fileID: 8300000, guid: c522288be30f8874cb68f17aac01c14c, type: 3}
+  - {fileID: 8300000, guid: 6bff0636fa15ea345ab76adc169280bc, type: 3}
+  - {fileID: 8300000, guid: 24a31738aebb0144b855329a03a9fbec, type: 3}
+  - {fileID: 8300000, guid: 7481623a15d07a3459471cffb3144503, type: 3}
   - {fileID: 8300000, guid: b7376b104ebb4ef46976518291d5ff00, type: 3}
-  - {fileID: 8300000, guid: 4292d9379b5255e40aa8782f5b1f354f, type: 3}
-  - {fileID: 8300000, guid: e9cd28b889a89f346bb898984f7a0215, type: 3}
-  - {fileID: 8300000, guid: f060e0c0ead0b3048a06d7d4065a60a5, type: 3}
-  - {fileID: 8300000, guid: dad19b690ae81e544ae577c0caeb0a75, type: 3}
-  - {fileID: 8300000, guid: 10cdc8679d13eac4481533ed2849712c, type: 3}
-  - {fileID: 0}
   bgmMixer: {fileID: -5744906430684802906, guid: 4a7c85b361a5b8444b04300d6d7eb207, type: 2}
   sfxMixer: {fileID: 5892031596332789687, guid: 4a7c85b361a5b8444b04300d6d7eb207, type: 2}
   maxSFX: 14

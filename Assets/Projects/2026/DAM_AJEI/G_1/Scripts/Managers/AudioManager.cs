@@ -7,13 +7,12 @@
 
 	public class AudioManager : MonoBehaviour
 	{
-		public enum BGM_Songs { MENU, LEVEL, WIN, LAST }
+		public enum BGM_Songs { WESTERN, FAIR, LAST }
 		public enum SFX_Sounds
 		{
-			JUMP, FOOTSTEPS, DIVISION, UNION, // Player
-			CHECKPOINT, DEAD, // Live
-			LEVER, TRAPDOOR, PILLOW, COLECT_MAGIC_ESSENCE, // Mechanics
-			LIGHTS, RETURN_BUTTON_CLICK, BUTTON_CLICK, // Extras
+			SHOT, RELOAD, NO_BULLETS,
+			WOOD_IMPACT, EXPLOSION,
+			NEXT_LEVEL, WIN,
 			LAST
 		}
 
@@ -28,7 +27,7 @@
 		public AudioMixerGroup sfxMixer;
 
 		[Header("SFX Settings")]
-		public int maxSFX = 5;
+		public int maxSFX = 4;
 		public float pitchMin = -0.15f;
 		public float pitchMax = 0.15f;
 
@@ -73,14 +72,12 @@
 		{
 			string scene = SceneManager.GetActiveScene().name;
 
-			if (scene.Contains("Menu"))
-				PlayBGM(BGM_Songs.MENU);
-			else if (scene.Contains("LVL"))
-				PlayBGM(BGM_Songs.LEVEL);
+			if (scene.Contains("G_1"))
+				PlayBGM(BGM_Songs.WESTERN);
 			else
 				StopBGM();
 		}
-
+		
 		public void PlayBGM(BGM_Songs song)
 		{
 			if (song == currentBGM || song == BGM_Songs.LAST) return;
