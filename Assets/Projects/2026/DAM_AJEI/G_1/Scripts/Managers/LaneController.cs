@@ -1,10 +1,9 @@
 using UnityEngine;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
-    /// Controla una línea concreta de la galería:
-    /// velocidad del rail y parámetros de los bandidos según el nivel.
+    /// Controla el rail, velocidad y config de los bandidos segun el nivel.
     /// </summary>
     public class LaneController : MonoBehaviour
     {
@@ -29,7 +28,7 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         [SerializeField] private float minimumBanditShotDelay = 0.75f;
 
         /// <summary>
-        /// Aplica los parámetros de dificultad según el nivel.
+        /// Aplica la config de dificultad segun el nivel.
         /// </summary>
         public void ApplyLevel(int level)
         {

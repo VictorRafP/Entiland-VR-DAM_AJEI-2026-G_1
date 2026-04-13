@@ -1,33 +1,31 @@
 using UnityEngine;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
-    /// Linea visual de disparo de la pistola
+    /// Línea visual de disparo de la pistola.
+    /// Usa LineRenderers asignados desde el inspector.
     /// </summary>
-    [RequireComponent(typeof(LineRenderer))]
     public class RevolverShotTracer : MonoBehaviour
     {
+        [Header("Line Renderers")]
+        [SerializeField] private LineRenderer centerLine;
+        [SerializeField] private LineRenderer leftLine;
+        [SerializeField] private LineRenderer rightLine;
+
         [Header("Tracer")]
         [SerializeField] private float visibleTime = 0.03f;
 
-        private LineRenderer lineRenderer;
         private float visibleTimer = 0f;
 
         private void Awake()
         {
-            lineRenderer = GetComponent<LineRenderer>();
-
-            lineRenderer.enabled = false;
-            lineRenderer.positionCount = 2;
-            lineRenderer.useWorldSpace = true;
-            lineRenderer.alignment = LineAlignment.View;
-            lineRenderer.textureMode = LineTextureMode.Stretch;
+            DisableAllLines();
         }
 
         private void Update()
         {
-            if (!lineRenderer.enabled)
+            if (!AnyLineVisible())
             {
                 return;
             }
@@ -35,21 +33,88 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             visibleTimer -= Time.deltaTime;
             if (visibleTimer <= 0f)
             {
-                lineRenderer.enabled = false;
+                DisableAllLines();
             }
         }
 
         public void ShowTracer(Vector3 start, Vector3 end)
         {
-            if (lineRenderer == null)
+            DisableAllLines();
+
+            if (centerLine != null)
             {
-                return;
+                centerLine.SetPosition(0, start);
+                centerLine.SetPosition(1, end);
+                centerLine.enabled = true;
             }
 
-            lineRenderer.SetPosition(0, start);
-            lineRenderer.SetPosition(1, end);
-            lineRenderer.enabled = true;
             visibleTimer = visibleTime;
+        }
+
+        public void ShowTripleTracer(Vector3 start, Vector3 centerEnd, Vector3 leftEnd, Vector3 rightEnd)
+        {
+            DisableAllLines();
+
+            if (centerLine != null)
+            {
+                centerLine.SetPosition(0, start);
+                centerLine.SetPosition(1, centerEnd);
+                centerLine.enabled = true;
+            }
+
+            if (leftLine != null)
+            {
+                leftLine.SetPosition(0, start);
+                leftLine.SetPosition(1, leftEnd);
+                leftLine.enabled = true;
+            }
+
+            if (rightLine != null)
+            {
+                rightLine.SetPosition(0, start);
+                rightLine.SetPosition(1, rightEnd);
+                rightLine.enabled = true;
+            }
+
+            visibleTimer = visibleTime;
+        }
+
+        private void DisableAllLines()
+        {
+            if (centerLine != null)
+            {
+                centerLine.enabled = false;
+            }
+
+            if (leftLine != null)
+            {
+                leftLine.enabled = false;
+            }
+
+            if (rightLine != null)
+            {
+                rightLine.enabled = false;
+            }
+        }
+
+        private bool AnyLineVisible()
+        {
+            if (centerLine != null && centerLine.enabled)
+            {
+                return true;
+            }
+
+            if (leftLine != null && leftLine.enabled)
+            {
+                return true;
+            }
+
+            if (rightLine != null && rightLine.enabled)
+            {
+                return true;
+            }
+
+            return false;
         }
     }
 }

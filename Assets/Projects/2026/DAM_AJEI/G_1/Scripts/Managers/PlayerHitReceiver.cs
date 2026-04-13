@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
     /// Hit para el player, lo llamamos con el script de los bandidos al disparar

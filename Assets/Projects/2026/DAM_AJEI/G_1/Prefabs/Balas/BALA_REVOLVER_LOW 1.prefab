@@ -64,6 +64,10 @@ PrefabInstance:
       propertyPath: m_ConstrainProportionsScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: -7511558181221131132, guid: 4478849808cb45d4f9a5f1daa0746144, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 43001aba445184049ade32554125cdfb, type: 2}
     - target: {fileID: 919132149155446097, guid: 4478849808cb45d4f9a5f1daa0746144, type: 3}
       propertyPath: m_Name
       value: BALA_REVOLVER_LOW 1
@@ -88,6 +92,11 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 4883340276451126327}
   m_SourcePrefab: {fileID: 100100000, guid: 4478849808cb45d4f9a5f1daa0746144, type: 3}
+--- !u!23 &66471127456791115 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 4478849808cb45d4f9a5f1daa0746144, type: 3}
+  m_PrefabInstance: {fileID: 1670187311213782735}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2012224284487719838 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 4478849808cb45d4f9a5f1daa0746144, type: 3}
@@ -106,6 +115,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isConsumed: 0
+  currentAmmoType: 0
+  ammoRenderers:
+  - {fileID: 66471127456791115}
+  normalAmmoMaterial: {fileID: 2100000, guid: 43001aba445184049ade32554125cdfb, type: 2}
+  explosiveAmmoMaterial: {fileID: 2100000, guid: 981e2e9d7adf96d47a7c551f1a654574, type: 2}
+  tripleAmmoMaterial: {fileID: 2100000, guid: 1b4b1c9a14380a045bea161fc0178105, type: 2}
 --- !u!114 &3647725691386773982
 MonoBehaviour:
   m_ObjectHideFlags: 0

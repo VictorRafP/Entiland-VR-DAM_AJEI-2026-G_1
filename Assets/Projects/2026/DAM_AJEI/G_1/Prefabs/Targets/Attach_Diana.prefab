@@ -47,9 +47,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   meshTransform: {fileID: 1051320647482912486}
   targetRenderers:
-  - {fileID: 0}
-  hitAudioSource: {fileID: 0}
-  hitSound: {fileID: 0}
+  - {fileID: 2223694456729589129}
   scoreOnHit: 100
   lifeDeltaOnHit: 0
   spinTurns: 5
@@ -174,5 +172,10 @@ BoxCollider:
 --- !u!4 &1051320647482912486 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 03b50910ce6ed55488b21a88f2c1a0ec, type: 3}
+  m_PrefabInstance: {fileID: 656878974592207117}
+  m_PrefabAsset: {fileID: 0}
+--- !u!23 &2223694456729589129 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: -7511558181221131132, guid: 03b50910ce6ed55488b21a88f2c1a0ec, type: 3}
   m_PrefabInstance: {fileID: 656878974592207117}
   m_PrefabAsset: {fileID: 0}

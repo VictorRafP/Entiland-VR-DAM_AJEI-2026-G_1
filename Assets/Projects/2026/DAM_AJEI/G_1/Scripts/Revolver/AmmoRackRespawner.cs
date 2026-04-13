@@ -1,9 +1,11 @@
 using UnityEngine;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
-    /// Controla la municion para que vaya spawneando todo el rato, si las balas salen de la zona, spawnea mas
+    /// Controla la munición del soporte.
+    /// Si una bala desaparece o sale del radio, vuelve a generar otra en ese slot.
+    /// También asigna el tipo de bala según probabilidades.
     /// </summary>
     public class AmmoRackRespawner : MonoBehaviour
     {
@@ -19,19 +21,29 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         [Header("Start")]
         [SerializeField] private bool spawnOnStart = true;
 
+        [Header("Ammo Types")]
+        [SerializeField] private bool useRandomAmmoTypes = true;
+        [SerializeField] private RevolverAmmoRound.AmmoType fixedAmmoType = RevolverAmmoRound.AmmoType.Normal;
+        [SerializeField] private float normalChance = 70f;
+        [SerializeField] private float explosiveChance = 15f;
+        [SerializeField] private float tripleChance = 15f;
+
         private GameObject[] spawnedAmmo;
         private float checkTimer = 0f;
 
         private void Awake()
         {
-            EnsureArraySize();
+            spawnedAmmo = new GameObject[spawnPoints.Length];
         }
 
         private void Start()
         {
             if (spawnOnStart)
             {
-                SpawnMissingAmmo();
+                for (int i = 0; i < spawnPoints.Length; i++)
+                {
+                    SpawnAmmoInSlot(i);
+                }
             }
         }
 
@@ -50,36 +62,17 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             }
 
             checkTimer = checkInterval;
-            SpawnMissingAmmo();
-        }
-
-        private void SpawnMissingAmmo()
-        {
-            if (ammoPrefab == null || spawnPoints == null || spawnPoints.Length == 0)
-            {
-                return;
-            }
-
-            EnsureArraySize();
 
             for (int i = 0; i < spawnPoints.Length; i++)
             {
-                Transform currentSpawnPoint = spawnPoints[i];
-                if (currentSpawnPoint == null)
+                if (SlotNeedsAmmo(i))
                 {
-                    continue;
+                    SpawnAmmoInSlot(i);
                 }
-
-                if (!IsSlotMissingAmmo(i))
-                {
-                    continue;
-                }
-
-                SpawnAmmoForSlot(i);
             }
         }
 
-        private bool IsSlotMissingAmmo(int slotIndex)
+        private bool SlotNeedsAmmo(int slotIndex)
         {
             if (slotIndex < 0 || slotIndex >= spawnedAmmo.Length)
             {
@@ -98,48 +91,34 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 return true;
             }
 
-            Vector3 centerPosition = GetDetectionCenterPosition();
-            Vector3 delta = currentAmmo.transform.position - centerPosition;
-            float radiusSqr = detectionRadius * detectionRadius;
+            Vector3 center = detectionCenter != null ? detectionCenter.position : transform.position;
+            Vector3 delta = currentAmmo.transform.position - center;
 
-            if (delta.sqrMagnitude > radiusSqr)
-            {
-                return true;
-            }
-
-            return false;
+            return delta.sqrMagnitude > detectionRadius * detectionRadius;
         }
 
-        private void SpawnAmmoForSlot(int slotIndex)
+        private void SpawnAmmoInSlot(int slotIndex)
         {
+            if (ammoPrefab == null)
+            {
+                return;
+            }
+
             if (slotIndex < 0 || slotIndex >= spawnPoints.Length)
             {
                 return;
             }
 
-            Transform currentSpawnPoint = spawnPoints[slotIndex];
-            if (currentSpawnPoint == null)
+            Transform spawnPoint = spawnPoints[slotIndex];
+            if (spawnPoint == null)
             {
                 return;
             }
 
-            GameObject newAmmo = Instantiate(
-                ammoPrefab,
-                currentSpawnPoint.position,
-                currentSpawnPoint.rotation);
-
+            GameObject newAmmo = Instantiate(ammoPrefab, spawnPoint.position, spawnPoint.rotation);
             spawnedAmmo[slotIndex] = newAmmo;
-            ResetAmmoInstance(newAmmo);
-        }
 
-        private void ResetAmmoInstance(GameObject ammoInstance)
-        {
-            if (ammoInstance == null)
-            {
-                return;
-            }
-
-            Rigidbody ammoBody = ammoInstance.GetComponent<Rigidbody>();
+            Rigidbody ammoBody = newAmmo.GetComponent<Rigidbody>();
             if (ammoBody != null)
             {
                 ammoBody.linearVelocity = Vector3.zero;
@@ -148,57 +127,50 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 ammoBody.useGravity = true;
             }
 
-            RevolverAmmoRound ammoRound = ammoInstance.GetComponent<RevolverAmmoRound>();
+            RevolverAmmoRound ammoRound = newAmmo.GetComponent<RevolverAmmoRound>();
             if (ammoRound != null)
             {
                 ammoRound.ResetRound();
+                ammoRound.ConfigureAmmoType(GetAmmoTypeToSpawn());
             }
-
-            ammoInstance.SetActive(true);
         }
 
-        private Vector3 GetDetectionCenterPosition()
+        private RevolverAmmoRound.AmmoType GetAmmoTypeToSpawn()
         {
-            if (detectionCenter != null)
+            if (!useRandomAmmoTypes)
             {
-                return detectionCenter.position;
+                return fixedAmmoType;
             }
 
-            return transform.position;
-        }
-
-        private void EnsureArraySize()
-        {
-            int targetSize = spawnPoints != null ? spawnPoints.Length : 0;
-
-            if (spawnedAmmo != null && spawnedAmmo.Length == targetSize)
+            float totalChance = normalChance + explosiveChance + tripleChance;
+            if (totalChance <= 0f)
             {
-                return;
+                return RevolverAmmoRound.AmmoType.Normal;
             }
 
-            GameObject[] newArray = new GameObject[targetSize];
+            float roll = Random.Range(0f, totalChance);
 
-            if (spawnedAmmo != null)
+            if (roll < normalChance)
             {
-                int copyLength = spawnedAmmo.Length;
-                if (copyLength > newArray.Length)
-                {
-                    copyLength = newArray.Length;
-                }
-
-                for (int i = 0; i < copyLength; i++)
-                {
-                    newArray[i] = spawnedAmmo[i];
-                }
+                return RevolverAmmoRound.AmmoType.Normal;
             }
 
-            spawnedAmmo = newArray;
+            roll -= normalChance;
+
+            if (roll < explosiveChance)
+            {
+                return RevolverAmmoRound.AmmoType.Explosive;
+            }
+
+            return RevolverAmmoRound.AmmoType.Triple;
         }
 
         private void OnDrawGizmosSelected()
         {
             Gizmos.color = Color.yellow;
-            Gizmos.DrawWireSphere(GetDetectionCenterPosition(), detectionRadius);
+
+            Vector3 center = detectionCenter != null ? detectionCenter.position : transform.position;
+            Gizmos.DrawWireSphere(center, detectionRadius);
         }
     }
 }

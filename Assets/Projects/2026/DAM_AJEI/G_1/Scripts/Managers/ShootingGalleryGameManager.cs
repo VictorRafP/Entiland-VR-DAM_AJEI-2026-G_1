@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
     /// Manager central de la galería de tiro, se encarga de registrar los hits, gestionar niveles y el momento del juego
@@ -29,10 +29,10 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         [SerializeField] private string levelPrefix = "Nivel ";
 
         [Header("UI - End Screen")]
+        [SerializeField] private GameObject endGameUiRoot;
         [SerializeField] private TMP_Text resultMessageText;
         [SerializeField] private string winMessage = "You Win";
         [SerializeField] private string loseMessage = "You Lose";
-        [SerializeField] private GameObject playAgainButtonObject;
 
         [Header("Lanes")]
         [SerializeField] private LaneController[] laneControllers;
@@ -196,6 +196,11 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 return;
             }
 
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.NEXT_LEVEL);
+            }
+
             ApplyLevelToLanes();
         }
 
@@ -237,9 +242,9 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             isGameOver = true;
             ShowResultMessage(loseMessage);
 
-            if (playAgainButtonObject != null)
+            if (AudioManager.Instance != null)
             {
-                playAgainButtonObject.SetActive(true);
+                // AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.LOSE);
             }
         }
 
@@ -248,33 +253,37 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             isWin = true;
             ShowResultMessage(winMessage);
 
-            if (playAgainButtonObject != null)
+            if (AudioManager.Instance != null)
             {
-                playAgainButtonObject.SetActive(true);
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.WIN);
             }
         }
 
         private void ShowResultMessage(string message)
         {
-            if (resultMessageText == null)
+            if (endGameUiRoot != null)
             {
-                return;
+                endGameUiRoot.SetActive(true);
             }
 
-            resultMessageText.text = message;
-            resultMessageText.gameObject.SetActive(true);
+            if (resultMessageText != null)
+            {
+                resultMessageText.text = message;
+                resultMessageText.gameObject.SetActive(true);
+            }
         }
 
         private void HideEndUi()
         {
-            if (resultMessageText != null)
+            if (endGameUiRoot != null)
             {
-                resultMessageText.gameObject.SetActive(false);
+                endGameUiRoot.SetActive(false);
             }
 
-            if (playAgainButtonObject != null)
+            if (resultMessageText != null)
             {
-                playAgainButtonObject.SetActive(false);
+                resultMessageText.text = string.Empty;
+                resultMessageText.gameObject.SetActive(false);
             }
         }
 

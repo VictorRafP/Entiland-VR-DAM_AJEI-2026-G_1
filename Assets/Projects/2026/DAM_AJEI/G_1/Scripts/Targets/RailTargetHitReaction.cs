@@ -1,9 +1,9 @@
 using UnityEngine;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
-    /// Informa al GameManager de puntos y cambio de vidas, y controla las reacciones de los hits en las dianas
+    /// Controla la reacción visual y de puntuación de una diana al recibir un hit.
     /// </summary>
     public class RailTargetHitReaction : MonoBehaviour
     {
@@ -18,8 +18,6 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         [Header("References")]
         [SerializeField] private Transform meshTransform;
         [SerializeField] private Renderer[] targetRenderers;
-        [SerializeField] private AudioSource hitAudioSource;
-        [SerializeField] private AudioClip hitSound;
 
         [Header("Gameplay")]
         [SerializeField] private int scoreOnHit = 100;
@@ -49,6 +47,7 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         private TargetState currentState = TargetState.Idle;
         private float stateTimer = 0f;
         private float brokenTimer = 0f;
+        private bool isBroken = false;
 
         private float originalLocalX = 0f;
         private float originalLocalY = 0f;
@@ -61,8 +60,6 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
         private Material[][] originalMaterials;
         private Color[][] originalColors;
-
-        private bool isBroken = false;
 
         private void Awake()
         {
@@ -78,47 +75,35 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
             CacheOriginalTransform();
             CacheOriginalVisuals();
-            RestoreOriginalStateImmediate();
+            RestoreOriginalVisuals();
+            SetMeshLocalRotation(originalLocalX, originalLocalY, originalLocalZ);
         }
 
         private void Update()
         {
-            if (currentState == TargetState.Reacting)
+            switch (currentState)
             {
-                UpdateReacting();
-                return;
-            }
+                case TargetState.Reacting:
+                    UpdateReacting();
+                    break;
 
-            if (currentState == TargetState.Holding)
-            {
-                UpdateHolding();
-                return;
-            }
+                case TargetState.Holding:
+                    UpdateHolding();
+                    break;
 
-            if (currentState == TargetState.Recovering)
-            {
-                UpdateRecovering();
-                return;
-            }
+                case TargetState.Recovering:
+                    UpdateRecovering();
+                    break;
 
-            if (currentState == TargetState.Idle && isBroken && recoverFromBrokenAfterDelay)
-            {
-                brokenTimer -= Time.deltaTime;
-                if (brokenTimer <= 0f)
-                {
-                    StartRecoveringFromBroken();
-                }
+                case TargetState.Idle:
+                    UpdateIdleBrokenRecovery();
+                    break;
             }
         }
 
         public void HitTarget()
         {
-            if (currentState != TargetState.Idle)
-            {
-                return;
-            }
-
-            if (isBroken)
+            if (currentState != TargetState.Idle || isBroken)
             {
                 return;
             }
@@ -129,13 +114,13 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             }
 
             PlayHitSound();
-            ApplyHitVisuals();
+            ApplyVisuals(hitColor, hitOverrideMaterial);
 
             reactionStartZ = originalLocalZ;
             reactionTargetZ = GetReactionTargetZ();
 
-            currentState = TargetState.Reacting;
             stateTimer = 0f;
+            currentState = TargetState.Reacting;
         }
 
         public void ResetTarget()
@@ -144,36 +129,25 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             stateTimer = 0f;
             brokenTimer = 0f;
             isBroken = false;
-            RestoreOriginalStateImmediate();
-        }
 
-        [ContextMenu("Debug Hit Target")]
-        public void DebugHitTarget()
-        {
-            HitTarget();
-        }
-
-        [ContextMenu("Debug Reset Target")]
-        public void DebugResetTarget()
-        {
-            ResetTarget();
+            RestoreOriginalVisuals();
+            SetMeshLocalRotation(originalLocalX, originalLocalY, originalLocalZ);
         }
 
         private void UpdateReacting()
         {
             stateTimer += Time.deltaTime;
 
-            float duration = Mathf.Max(0.0001f, reactDuration);
-            float t = Mathf.Clamp01(stateTimer / duration);
-
+            float t = Mathf.Clamp01(stateTimer / Mathf.Max(0.0001f, reactDuration));
             float currentZ = Mathf.Lerp(reactionStartZ, reactionTargetZ, t);
+
             SetMeshLocalRotation(originalLocalX, originalLocalY, currentZ);
 
             if (t >= 1f)
             {
                 SetMeshLocalRotation(originalLocalX, originalLocalY, reactionTargetZ);
-                currentState = TargetState.Holding;
                 stateTimer = 0f;
+                currentState = TargetState.Holding;
             }
         }
 
@@ -188,10 +162,11 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
             if (keepBrokenStateAfterHit)
             {
-                ApplyBrokenVisuals();
+                ApplyVisuals(brokenColor, brokenOverrideMaterial);
                 SetMeshLocalRotation(originalLocalX, originalLocalY, originalLocalZ + hitLocalZ);
 
                 isBroken = true;
+                stateTimer = 0f;
                 currentState = TargetState.Idle;
 
                 if (recoverFromBrokenAfterDelay)
@@ -202,76 +177,72 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 return;
             }
 
-            RestoreOriginalMaterials();
-
-            recoverStartZ = originalLocalZ + hitLocalZ;
-            recoverTargetZ = originalLocalZ;
-
-            currentState = TargetState.Recovering;
-            stateTimer = 0f;
+            StartRecovering();
         }
 
         private void UpdateRecovering()
         {
             stateTimer += Time.deltaTime;
 
-            float duration = Mathf.Max(0.0001f, recoverDuration);
-            float t = Mathf.Clamp01(stateTimer / duration);
-
+            float t = Mathf.Clamp01(stateTimer / Mathf.Max(0.0001f, recoverDuration));
             float currentZ = Mathf.Lerp(recoverStartZ, recoverTargetZ, t);
 
             SetMeshLocalRotation(originalLocalX, originalLocalY, currentZ);
-            LerpColorsBackToOriginal(t);
 
             if (t >= 1f)
             {
-                RestoreOriginalStateImmediate();
-                currentState = TargetState.Idle;
+                RestoreOriginalVisuals();
+                SetMeshLocalRotation(originalLocalX, originalLocalY, originalLocalZ);
+
                 stateTimer = 0f;
                 brokenTimer = 0f;
                 isBroken = false;
+                currentState = TargetState.Idle;
             }
         }
 
-        private void StartRecoveringFromBroken()
+        private void UpdateIdleBrokenRecovery()
         {
-            RestoreOriginalMaterials();
+            if (!isBroken || !recoverFromBrokenAfterDelay)
+            {
+                return;
+            }
 
-            recoverStartZ = originalLocalZ + hitLocalZ;
+            brokenTimer -= Time.deltaTime;
+            if (brokenTimer <= 0f)
+            {
+                StartRecovering();
+            }
+        }
+
+        private void StartRecovering()
+        {
+            RestoreOriginalVisuals();
+
+            recoverStartZ = meshTransform != null ? meshTransform.localEulerAngles.z : originalLocalZ + hitLocalZ;
             recoverTargetZ = originalLocalZ;
 
-            currentState = TargetState.Recovering;
             stateTimer = 0f;
             brokenTimer = 0f;
             isBroken = false;
+            currentState = TargetState.Recovering;
         }
 
         private float GetReactionTargetZ()
         {
-            float directionalFinalOffset = GetDirectionalFinalOffset(hitLocalZ);
+            float finalOffset = GetDirectionalFinalOffset(hitLocalZ);
             float spinOffset = spinTurns * 360f * GetDirectionSign();
-
-            return originalLocalZ + spinOffset + directionalFinalOffset;
+            return originalLocalZ + spinOffset + finalOffset;
         }
 
         private float GetDirectionalFinalOffset(float finalOffset)
         {
             if (clockwise)
             {
-                if (finalOffset > 0f)
-                {
-                    return finalOffset - 360f;
-                }
-
-                return finalOffset;
+                return finalOffset > 0f ? finalOffset - 360f : finalOffset;
             }
 
-            if (finalOffset < 0f)
-            {
-                return finalOffset + 360f;
-            }
-
-            return finalOffset;
+            return finalOffset < 0f ? finalOffset + 360f : finalOffset;
         }
 
         private float GetDirectionSign()
@@ -328,23 +299,12 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
                 for (int materialIndex = 0; materialIndex < rendererMaterials.Length; materialIndex++)
                 {
-                    Material currentMaterial = rendererMaterials[materialIndex];
-                    originalColors[rendererIndex][materialIndex] = GetMaterialColor(currentMaterial);
+                    originalColors[rendererIndex][materialIndex] = GetMaterialColor(rendererMaterials[materialIndex]);
                 }
             }
         }
 
-        private void ApplyHitVisuals()
-        {
-            ApplyVisualSet(hitColor, hitOverrideMaterial);
-        }
-
-        private void ApplyBrokenVisuals()
-        {
-            ApplyVisualSet(brokenColor, brokenOverrideMaterial);
-        }
-
-        private void ApplyVisualSet(Color targetColor, Material overrideMaterial)
+        private void ApplyVisuals(Color targetColor, Material overrideMaterial)
         {
             if (targetRenderers == null)
             {
@@ -360,35 +320,28 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 }
 
                 Material[] currentMaterials = currentRenderer.materials;
-                Material[] replacementMaterials = new Material[currentMaterials.Length];
+
+                if (overrideMaterial != null)
+                {
+                    for (int i = 0; i < currentMaterials.Length; i++)
+                    {
+                        currentMaterials[i] = overrideMaterial;
+                    }
+
+                    currentRenderer.materials = currentMaterials;
+                    currentMaterials = currentRenderer.materials;
+                }
 
                 for (int materialIndex = 0; materialIndex < currentMaterials.Length; materialIndex++)
                 {
-                    Material baseMaterial = currentMaterials[materialIndex];
-
-                    if (overrideMaterial != null)
-                    {
-                        replacementMaterials[materialIndex] = overrideMaterial;
-                    }
-                    else
-                    {
-                        replacementMaterials[materialIndex] = baseMaterial;
-                    }
-                }
-
-                currentRenderer.materials = replacementMaterials;
-
-                Material[] activeMaterials = currentRenderer.materials;
-                for (int materialIndex = 0; materialIndex < activeMaterials.Length; materialIndex++)
-                {
-                    SetMaterialColor(activeMaterials[materialIndex], targetColor);
+                    SetMaterialColor(currentMaterials[materialIndex], targetColor);
                 }
             }
         }
 
-        private void RestoreOriginalMaterials()
+        private void RestoreOriginalVisuals()
         {
-            if (targetRenderers == null || originalMaterials == null)
+            if (targetRenderers == null || originalMaterials == null || originalColors == null)
             {
                 return;
             }
@@ -399,89 +352,31 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             {
                 Renderer currentRenderer = targetRenderers[rendererIndex];
                 Material[] cachedMaterials = originalMaterials[rendererIndex];
+                Color[] cachedColors = originalColors[rendererIndex];
 
-                if (currentRenderer == null || cachedMaterials == null)
+                if (currentRenderer == null || cachedMaterials == null || cachedColors == null)
                 {
                     continue;
                 }
 
                 currentRenderer.materials = cachedMaterials;
-            }
-        }
-
-        private void LerpColorsBackToOriginal(float t)
-        {
-            if (targetRenderers == null || originalColors == null)
-            {
-                return;
-            }
-
-            int rendererCount = Mathf.Min(targetRenderers.Length, originalColors.Length);
-
-            for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++)
-            {
-                Renderer currentRenderer = targetRenderers[rendererIndex];
-                Color[] cachedColors = originalColors[rendererIndex];
-
-                if (currentRenderer == null || cachedColors == null)
-                {
-                    continue;
-                }
 
                 Material[] currentMaterials = currentRenderer.materials;
                 int materialCount = Mathf.Min(currentMaterials.Length, cachedColors.Length);
 
                 for (int materialIndex = 0; materialIndex < materialCount; materialIndex++)
                 {
-                    Material currentMaterial = currentMaterials[materialIndex];
-                    Color originalColor = cachedColors[materialIndex];
-                    Color currentColor = GetMaterialColor(currentMaterial);
-                    Color lerpedColor = Color.Lerp(currentColor, originalColor, t);
-
-                    SetMaterialColor(currentMaterial, lerpedColor);
+                    SetMaterialColor(currentMaterials[materialIndex], cachedColors[materialIndex]);
                 }
             }
-        }
-
-        private void RestoreOriginalStateImmediate()
-        {
-            RestoreOriginalMaterials();
-
-            if (targetRenderers != null && originalColors != null)
-            {
-                int rendererCount = Mathf.Min(targetRenderers.Length, originalColors.Length);
-
-                for (int rendererIndex = 0; rendererIndex < rendererCount; rendererIndex++)
-                {
-                    Renderer currentRenderer = targetRenderers[rendererIndex];
-                    Color[] cachedColors = originalColors[rendererIndex];
-
-                    if (currentRenderer == null || cachedColors == null)
-                    {
-                        continue;
-                    }
-
-                    Material[] currentMaterials = currentRenderer.materials;
-                    int materialCount = Mathf.Min(currentMaterials.Length, cachedColors.Length);
-
-                    for (int materialIndex = 0; materialIndex < materialCount; materialIndex++)
-                    {
-                        SetMaterialColor(currentMaterials[materialIndex], cachedColors[materialIndex]);
-                    }
-                }
-            }
-
-            SetMeshLocalRotation(originalLocalX, originalLocalY, originalLocalZ);
         }
 
         private void PlayHitSound()
         {
-            if (hitAudioSource == null || hitSound == null)
+            if (AudioManager.Instance != null)
             {
-                return;
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.WOOD_IMPACT);
             }
-
-            hitAudioSource.PlayOneShot(hitSound);
         }
 
         private Color GetMaterialColor(Material material)

@@ -12,7 +12,7 @@ GameObject:
   m_Layer: 0
   m_Name: Spawn_05
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 709929027599710456}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.483, y: 0, z: 0.488}
+  m_LocalPosition: {x: 1.483, y: 0.87000114, z: 0.488}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -43,7 +43,7 @@ GameObject:
   m_Layer: 0
   m_Name: Spawn_04
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -56,7 +56,7 @@ Transform:
   m_GameObject: {fileID: 1760584486753881749}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.493, y: 0, z: -0.202}
+  m_LocalPosition: {x: 1.493, y: 0.87000114, z: -0.202}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -74,7 +74,7 @@ GameObject:
   m_Layer: 0
   m_Name: Spawn_01
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -87,7 +87,7 @@ Transform:
   m_GameObject: {fileID: 2938746485860870393}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.014, y: 0, z: -0.018}
+  m_LocalPosition: {x: 1.014, y: 0.87000114, z: -0.018}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -105,7 +105,7 @@ GameObject:
   m_Layer: 0
   m_Name: Spawn_03
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -118,7 +118,7 @@ Transform:
   m_GameObject: {fileID: 2977904182160542959}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.014, y: 0, z: -0.474}
+  m_LocalPosition: {x: 1.014, y: 0.87000114, z: -0.474}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -136,7 +136,7 @@ GameObject:
   m_Layer: 0
   m_Name: Spawn
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -149,7 +149,7 @@ Transform:
   m_GameObject: {fileID: 3374962728394573596}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.821, y: 0, z: 0.446}
+  m_LocalPosition: {x: 1.821, y: 0.87, z: 0.446}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -167,7 +167,7 @@ GameObject:
   m_Layer: 0
   m_Name: Spawn_02
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7866945982896999795, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -180,7 +180,7 @@ Transform:
   m_GameObject: {fileID: 4334514395931296637}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.014, y: 0, z: 0.613}
+  m_LocalPosition: {x: 1.014, y: 0.87000114, z: 0.613}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -313,31 +313,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 52843f46866e6274cb3818cc20d5acc3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ammoPool:
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  - {fileID: 0}
-  localSpawnOffset: {x: 0, y: 0, z: 0.04}
-  localSpawnEuler: {x: 0, y: 0, z: 0}
-  forceReleaseCurrentHeldObject: 0
-  touchCooldown: 0.15
-  playHaptics: 0
-  hapticDuration: 0.05
-  hapticAmplitude: 0.4
+  ammoPrefab: {fileID: 2012224284487719838, guid: b2e2d692206d7fa48a94d4be9d3b0a6e, type: 3}
+  spawnPoints:
+  - {fileID: 2789265334727075315}
+  - {fileID: 6566838736597940195}
+  - {fileID: 8137141739388244061}
+  - {fileID: 8058446299112505577}
+  - {fileID: 524291167127883456}
+  - {fileID: 4892404719692998873}
+  detectionCenter: {fileID: 0}
+  detectionRadius: 0.35
+  checkInterval: 0.25
+  spawnOnStart: 1
+  useRandomAmmoTypes: 1
+  fixedAmmoType: 0
+  normalChance: 70
+  explosiveChance: 15
+  tripleChance: 15

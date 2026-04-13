@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Projects/2026/DAM_AJEI/G_1/G_1.unity
+    path: Assets/Projects/2026/DAM_AJEI/G_1/Scenes/G_1.unity
     guid: 2d86dd36a572b46459ef197536adce95
   m_configObjects:
     com.unity.xr.management.loader_settings: {fileID: 11400000, guid: 207b5b1301824714daf82998d8984ec0, type: 2}

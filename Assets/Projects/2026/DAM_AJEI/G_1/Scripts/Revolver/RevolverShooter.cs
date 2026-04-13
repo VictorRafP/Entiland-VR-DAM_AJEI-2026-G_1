@@ -1,9 +1,9 @@
 using UnityEngine;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
-    /// Se encarga de gestionar el disparo y sus condiciones, cuando puede disparar y cuando puede recargar
+    /// Gestiona el disparo del revólver y el comportamiento según el tipo de bala.
     /// </summary>
     [RequireComponent(typeof(Rigidbody))]
     public class RevolverShooter : MonoBehaviour
@@ -20,9 +20,18 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         [SerializeField] private float recoilPower = 1.25f;
         [SerializeField] private LayerMask hitMask = ~0;
 
-        [Header("Audio")]
-        [SerializeField] private AudioSource shootAudioSource;
-        [SerializeField] private AudioSource emptyAudioSource;
+        [Header("Triple Shot")]
+        [SerializeField] private float tripleSpreadAngle = 12f;
+
+        [Header("Explosive Shot")]
+        [SerializeField] private float explosionRadius = 2f;
+        [SerializeField] private float explosionForce = 12f;
+        [SerializeField] private ParticleSystem explosionImpactParticles;
+
+        [Header("Muzzle Particles")]
+        [SerializeField] private ParticleSystem normalMuzzleParticles;
+        [SerializeField] private ParticleSystem explosiveMuzzleParticles;
+        [SerializeField] private ParticleSystem tripleMuzzleParticles;
 
         [Header("Debug")]
         [SerializeField] private bool enableDebugLogs = false;
@@ -82,9 +91,9 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 {
                     revolverCylinder.CloseCylinder();
                 }
-                else
+                else if (AudioManager.Instance != null)
                 {
-                    PlayEmptySound();
+                    AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.NO_BULLETS);
                 }
 
                 return;
@@ -111,77 +120,220 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 return;
             }
 
-            bool consumedRound = revolverCylinder.TryConsumeRoundForShot();
-
-            if (enableDebugLogs)
-            {
-                Debug.Log("RevolverShooter -> TryConsumeRoundForShot(): " + consumedRound, this);
-            }
+            RevolverAmmoRound.AmmoType ammoType;
+            bool consumedRound = revolverCylinder.TryConsumeRoundForShot(out ammoType);
 
             if (!consumedRound)
             {
-                PlayEmptySound();
+                if (AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.NO_BULLETS);
+                }
+
                 return;
             }
 
-            PlayShootSound();
-            PerformRaycast();
+            switch (ammoType)
+            {
+                case RevolverAmmoRound.AmmoType.Explosive:
+                    ShootExplosive();
+                    break;
+
+                case RevolverAmmoRound.AmmoType.Triple:
+                    ShootTriple();
+                    break;
+
+                default:
+                    ShootNormal();
+                    break;
+            }
+
             ApplyRecoil();
         }
 
-        private void PerformRaycast()
+        private void ShootNormal()
         {
-            if (barrelTip == null)
-            {
-                if (enableDebugLogs)
-                {
-                    Debug.LogWarning("RevolverShooter -> BarrelTip es null", this);
-                }
+            Vector3 origin = barrelTip != null ? barrelTip.position : transform.position;
+            Vector3 direction = barrelTip != null ? barrelTip.forward : transform.forward;
+            Vector3 endPoint = origin + direction * range;
 
-                return;
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.SHOT);
             }
 
-            Vector3 origin = barrelTip.position;
-            Vector3 direction = barrelTip.forward;
-
-            if (Physics.Raycast(origin, direction, out RaycastHit hit, range, hitMask, QueryTriggerInteraction.Ignore))
+            if (normalMuzzleParticles != null)
             {
-                if (IsOwnCollider(hit.collider))
-                {
-                    if (enableDebugLogs)
-                    {
-                        Debug.LogWarning("El raycast esta golpeando el propio revolver");
-                    }
-
-                    Vector3 fallbackEnd = origin + direction * range;
-                    shotTracer?.ShowTracer(origin, fallbackEnd);
-                    Debug.DrawRay(origin, direction * range, Color.yellow, 1f);
-                    return;
-                }
-
-                shotTracer?.ShowTracer(origin, hit.point);
-                Debug.DrawRay(origin, hit.point - origin, Color.green, 1f);
-
-                if (hit.rigidbody != null)
-                {
-                    hit.rigidbody.AddForceAtPosition(direction * hitPower, hit.point, ForceMode.Impulse);
-                }
-
-                TryHandleTargetHit(hit.collider);
+                normalMuzzleParticles.Play();
             }
-            else
+
+            RaycastHit hit;
+            if (TryGetValidHit(origin, direction, out hit))
             {
-                Vector3 endPoint = origin + direction * range;
-                shotTracer?.ShowTracer(origin, endPoint);
-                Debug.DrawRay(origin, direction * range, Color.red, 1f);
+                endPoint = hit.point;
+                ApplyPhysicsImpact(hit, direction);
+
+                if (TryHandleTargetHit(hit.collider) && AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.WOOD_IMPACT);
+                }
+            }
+
+            if (shotTracer != null)
+            {
+                shotTracer.ShowTracer(origin, endPoint);
             }
         }
 
-        private void TryHandleTargetHit(Collider hitCollider)
+        private void ShootTriple()
+        {
+            Vector3 origin = barrelTip != null ? barrelTip.position : transform.position;
+            Vector3 centerDirection = barrelTip != null ? barrelTip.forward : transform.forward;
+            Vector3 upAxis = barrelTip != null ? barrelTip.up : transform.up;
+
+            Vector3 leftDirection = Quaternion.AngleAxis(-tripleSpreadAngle, upAxis) * centerDirection;
+            Vector3 rightDirection = Quaternion.AngleAxis(tripleSpreadAngle, upAxis) * centerDirection;
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.SHOT);
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.SHOT);
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.SHOT);
+            }
+
+            if (tripleMuzzleParticles != null)
+            {
+                tripleMuzzleParticles.Play();
+            }
+
+            Vector3 centerEnd = FireSingleRay(origin, centerDirection);
+            Vector3 leftEnd = FireSingleRay(origin, leftDirection);
+            Vector3 rightEnd = FireSingleRay(origin, rightDirection);
+
+            if (shotTracer != null)
+            {
+                shotTracer.ShowTripleTracer(origin, centerEnd, leftEnd, rightEnd);
+            }
+        }
+
+        private void ShootExplosive()
+        {
+            Vector3 origin = barrelTip != null ? barrelTip.position : transform.position;
+            Vector3 direction = barrelTip != null ? barrelTip.forward : transform.forward;
+            Vector3 endPoint = origin + direction * range;
+
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.SHOT);
+            }
+
+            if (explosiveMuzzleParticles != null)
+            {
+                explosiveMuzzleParticles.Play();
+            }
+
+            RaycastHit hit;
+            if (TryGetValidHit(origin, direction, out hit))
+            {
+                endPoint = hit.point;
+                ApplyPhysicsImpact(hit, direction);
+                ExplodeAtPoint(hit.point);
+            }
+
+            if (shotTracer != null)
+            {
+                shotTracer.ShowTracer(origin, endPoint);
+            }
+        }
+
+        private Vector3 FireSingleRay(Vector3 origin, Vector3 direction)
+        {
+            Vector3 endPoint = origin + direction * range;
+
+            RaycastHit hit;
+            if (TryGetValidHit(origin, direction, out hit))
+            {
+                endPoint = hit.point;
+                ApplyPhysicsImpact(hit, direction);
+
+                if (TryHandleTargetHit(hit.collider) && AudioManager.Instance != null)
+                {
+                    AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.WOOD_IMPACT);
+                }
+            }
+
+            return endPoint;
+        }
+
+        private void ExplodeAtPoint(Vector3 point)
+        {
+            if (AudioManager.Instance != null)
+            {
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.EXPLOSION);
+            }
+
+            if (explosionImpactParticles != null)
+            {
+                explosionImpactParticles.transform.position = point;
+                explosionImpactParticles.Play();
+            }
+
+            Collider[] hitColliders = Physics.OverlapSphere(point, explosionRadius, hitMask, QueryTriggerInteraction.Ignore);
+
+            for (int i = 0; i < hitColliders.Length; i++)
+            {
+                Collider currentCollider = hitColliders[i];
+                if (currentCollider == null || IsOwnCollider(currentCollider))
+                {
+                    continue;
+                }
+
+                Rigidbody hitBody = currentCollider.attachedRigidbody;
+                if (hitBody != null)
+                {
+                    hitBody.AddExplosionForce(explosionForce, point, explosionRadius, 0f, ForceMode.Impulse);
+                }
+
+                TryHandleTargetHit(currentCollider);
+            }
+        }
+
+        private bool TryGetValidHit(Vector3 origin, Vector3 direction, out RaycastHit validHit)
+        {
+            validHit = new RaycastHit();
+
+            RaycastHit[] hits = Physics.RaycastAll(origin, direction, range, hitMask, QueryTriggerInteraction.Ignore);
+            float closestDistance = float.MaxValue;
+            bool foundValidHit = false;
+
+            for (int i = 0; i < hits.Length; i++)
+            {
+                if (hits[i].collider == null)
+                {
+                    continue;
+                }
+
+                if (IsOwnCollider(hits[i].collider))
+                {
+                    continue;
+                }
+
+                if (hits[i].distance < closestDistance)
+                {
+                    closestDistance = hits[i].distance;
+                    validHit = hits[i];
+                    foundValidHit = true;
+                }
+            }
+
+            return foundValidHit;
+        }
+
+        private bool TryHandleTargetHit(Collider hitCollider)
         {
             if (hitCollider == null)
             {
-                return;
+                return false;
             }
 
             RailTargetHitReaction railTarget = hitCollider.GetComponent<RailTargetHitReaction>();
@@ -193,7 +345,7 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             if (railTarget != null)
             {
                 railTarget.HitTarget();
-                return;
+                return true;
             }
 
             BanditTarget banditTarget = hitCollider.GetComponent<BanditTarget>();
@@ -205,6 +357,17 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             if (banditTarget != null)
             {
                 banditTarget.HitBandit();
+                return true;
+            }
+
+            return false;
+        }
+
+        private void ApplyPhysicsImpact(RaycastHit hit, Vector3 direction)
+        {
+            if (hit.rigidbody != null)
+            {
+                hit.rigidbody.AddForceAtPosition(direction * hitPower, hit.point, ForceMode.Impulse);
             }
         }
 
@@ -236,24 +399,15 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             revolverBody.AddForceAtPosition(barrelTip.up * recoilPower, barrelTip.position, ForceMode.Impulse);
         }
 
-        private void PlayShootSound()
+        private void OnDrawGizmosSelected()
         {
-            if (shootAudioSource == null || shootAudioSource.clip == null)
+            if (barrelTip == null)
             {
                 return;
             }
 
-            shootAudioSource.PlayOneShot(shootAudioSource.clip);
-        }
-
-        private void PlayEmptySound()
-        {
-            if (emptyAudioSource == null || emptyAudioSource.clip == null)
-            {
-                return;
-            }
-
-            emptyAudioSource.PlayOneShot(emptyAudioSource.clip);
+            Gizmos.color = Color.red;
+            Gizmos.DrawWireSphere(barrelTip.position + barrelTip.forward * 2f, explosionRadius);
         }
     }
 }

@@ -1,14 +1,23 @@
 using UnityEngine;
 
-namespace Entiland_VR_DAM_AJEI_2026_G_1
+namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 {
     /// <summary>
-    /// Controla el tambor del revólver, su posicion y cuando esta cargado o no
+    /// Controla el tambor del revólver, su posición, su estado y el tipo de bala cargada en cada recámara.
     /// </summary>
     public class RevolverCylinder : MonoBehaviour
     {
+        private struct ChamberData
+        {
+            public bool loaded;
+            public RevolverAmmoRound.AmmoType ammoType;
+        }
+
         [Header("Visual Bullets")]
         [SerializeField] private GameObject[] visualBullets = new GameObject[6];
+        [SerializeField] private Material normalVisualBulletMaterial;
+        [SerializeField] private Material explosiveVisualBulletMaterial;
+        [SerializeField] private Material tripleVisualBulletMaterial;
 
         [Header("Reload")]
         [SerializeField] private Collider reloadTrigger;
@@ -27,28 +36,21 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         [Header("Ammo")]
         [SerializeField] private bool startFull = true;
 
-        private readonly bool[] loadedChambers = new bool[6];
+        private ChamberData[] chambers = new ChamberData[6];
 
         private bool isOpenRequested = false;
         private bool isFullyOpen = false;
         private bool isFullyClosed = true;
-
-        private float targetSpinLocalY = 0f;
         private bool isSpinInProgress = false;
 
+        private float targetSpinLocalY = 0f;
         private int currentChamberIndex = 0;
 
-        /// <summary>
-        /// Indica si tambor abierto
-        /// </summary>
         public bool IsOpen
         {
             get { return isFullyOpen; }
         }
 
-        /// <summary>
-        /// Indica si tambor cerrado
-        /// </summary>
         public bool IsClosed
         {
             get { return isFullyClosed; }
@@ -59,18 +61,15 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             get { return !isFullyOpen && !isFullyClosed; }
         }
 
-        /// <summary>
-        /// Cantidad actual de balas cargadas
-        /// </summary>
         public int LoadedCount
         {
             get
             {
                 int count = 0;
 
-                for (int i = 0; i < loadedChambers.Length; i++)
+                for (int i = 0; i < chambers.Length; i++)
                 {
-                    if (loadedChambers[i])
+                    if (chambers[i].loaded)
                     {
                         count++;
                     }
@@ -82,9 +81,13 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
         private void Awake()
         {
-            InitializeChambers();
-            RefreshVisualBullets();
+            for (int i = 0; i < chambers.Length; i++)
+            {
+                chambers[i].loaded = startFull;
+                chambers[i].ammoType = RevolverAmmoRound.AmmoType.Normal;
+            }
 
+            RefreshVisualBullets();
             SetReloadTriggerState(false);
 
             if (closedPose != null)
@@ -108,13 +111,16 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
 
         private void FixedUpdate()
         {
+            if (ShootingGalleryGameManager.Instance != null &&
+                !ShootingGalleryGameManager.Instance.IsGameplayRunning)
+            {
+                return;
+            }
+
             UpdateOpenPose();
             UpdateSpinRotation();
         }
 
-        /// <summary>
-        /// Devuelve true si el revolver puede disparar
-        /// </summary>
         public bool CanFire()
         {
             if (!isFullyClosed)
@@ -132,22 +138,23 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 return false;
             }
 
-            return loadedChambers[currentChamberIndex];
+            return chambers[currentChamberIndex].loaded;
         }
 
-        /// <summary>
-        /// Consume una bala si el revolver puede disparar
-        /// </summary>
-        public bool TryConsumeRoundForShot()
+        public bool TryConsumeRoundForShot(out RevolverAmmoRound.AmmoType firedAmmoType)
         {
+            firedAmmoType = RevolverAmmoRound.AmmoType.Normal;
+
             if (!CanFire())
             {
                 return false;
             }
 
-            loadedChambers[currentChamberIndex] = false;
-            RefreshVisualBullets();
+            firedAmmoType = chambers[currentChamberIndex].ammoType;
+            chambers[currentChamberIndex].loaded = false;
+            chambers[currentChamberIndex].ammoType = RevolverAmmoRound.AmmoType.Normal;
 
+            RefreshVisualBullets();
             AdvanceSpin();
             AdvanceChamberIndex();
 
@@ -159,38 +166,25 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             return true;
         }
 
-        /// <summary>
-        /// Cargar balas
-        /// </summary>
         public void TryInsertRoundFromTrigger(Collider other)
         {
-            if (!isFullyOpen)
-            {
-                return;
-            }
-
-            if (other == null)
+            if (!isFullyOpen || other == null)
             {
                 return;
             }
 
             RevolverAmmoRound ammoRound = other.GetComponent<RevolverAmmoRound>();
-            if (ammoRound == null)
+            if (ammoRound == null || ammoRound.IsConsumed)
             {
                 return;
             }
 
-            if (ammoRound.IsConsumed)
+            if (TryInsertRound(ammoRound) && AudioManager.Instance != null)
             {
-                return;
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.RELOAD);
             }
-
-            TryInsertRound(ammoRound);
         }
 
-        /// <summary>
-        /// Apertura del tambor
-        /// </summary>
         public void OpenCylinder()
         {
             if (IsBusy)
@@ -203,9 +197,6 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             SetReloadTriggerState(false);
         }
 
-        /// <summary>
-        /// Cerrar tambor, solo cierra si hay al menos una bala cargada
-        /// </summary>
         public void CloseCylinder()
         {
             if (IsBusy)
@@ -223,9 +214,6 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             SetReloadTriggerState(false);
         }
 
-        /// <summary>
-        /// Toggle entre abierto y cerrado
-        /// </summary>
         public void ToggleCylinder()
         {
             if (IsBusy)
@@ -243,33 +231,81 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             }
         }
 
-        private void InitializeChambers()
+        private bool TryInsertRound(RevolverAmmoRound ammoRound)
         {
-            for (int i = 0; i < loadedChambers.Length; i++)
+            for (int i = 0; i < chambers.Length; i++)
             {
-                loadedChambers[i] = startFull;
+                int slotIndex = currentChamberIndex + i;
+                if (slotIndex >= chambers.Length)
+                {
+                    slotIndex -= chambers.Length;
+                }
+
+                if (chambers[slotIndex].loaded)
+                {
+                    continue;
+                }
+
+                chambers[slotIndex].loaded = true;
+                chambers[slotIndex].ammoType = ammoRound.CurrentAmmoType;
+
+                ammoRound.Consume();
+                RefreshVisualBullets();
+                return true;
             }
+
+            return false;
         }
 
         private void RefreshVisualBullets()
         {
-            if (visualBullets == null)
-            {
-                return;
-            }
-
             int count = visualBullets.Length;
-            if (count > loadedChambers.Length)
+            if (count > chambers.Length)
             {
-                count = loadedChambers.Length;
+                count = chambers.Length;
             }
 
             for (int i = 0; i < count; i++)
             {
-                if (visualBullets[i] != null)
+                GameObject currentBullet = visualBullets[i];
+                if (currentBullet == null)
                 {
-                    visualBullets[i].SetActive(loadedChambers[i]);
+                    continue;
                 }
+
+                currentBullet.SetActive(chambers[i].loaded);
+
+                if (!chambers[i].loaded)
+                {
+                    continue;
+                }
+
+                Renderer currentRenderer = currentBullet.GetComponentInChildren<Renderer>(true);
+                if (currentRenderer == null)
+                {
+                    continue;
+                }
+
+                Material targetMaterial = GetVisualMaterial(chambers[i].ammoType);
+                if (targetMaterial != null)
+                {
+                    currentRenderer.material = targetMaterial;
+                }
+            }
+        }
+
+        private Material GetVisualMaterial(RevolverAmmoRound.AmmoType ammoType)
+        {
+            switch (ammoType)
+            {
+                case RevolverAmmoRound.AmmoType.Explosive:
+                    return explosiveVisualBulletMaterial;
+
+                case RevolverAmmoRound.AmmoType.Triple:
+                    return tripleVisualBulletMaterial;
+
+                default:
+                    return normalVisualBulletMaterial;
             }
         }
 
@@ -281,24 +317,18 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
                 return;
             }
 
-            Vector3 currentPosition = transform.localPosition;
-            Quaternion currentRotation = transform.localRotation;
-
-            Vector3 nextPosition = Vector3.MoveTowards(
-                currentPosition,
+            transform.localPosition = Vector3.MoveTowards(
+                transform.localPosition,
                 targetPose.localPosition,
                 poseMoveSpeed * Time.fixedDeltaTime);
 
-            Quaternion nextRotation = Quaternion.RotateTowards(
-                currentRotation,
+            transform.localRotation = Quaternion.RotateTowards(
+                transform.localRotation,
                 targetPose.localRotation,
                 poseRotateSpeed * Time.fixedDeltaTime);
 
-            transform.localPosition = nextPosition;
-            transform.localRotation = nextRotation;
-
-            bool reachedPosition = Vector3.Distance(nextPosition, targetPose.localPosition) <= 0.0005f;
-            bool reachedRotation = Quaternion.Angle(nextRotation, targetPose.localRotation) <= 0.05f;
+            bool reachedPosition = Vector3.Distance(transform.localPosition, targetPose.localPosition) <= 0.0005f;
+            bool reachedRotation = Quaternion.Angle(transform.localRotation, targetPose.localRotation) <= 0.05f;
 
             if (reachedPosition && reachedRotation)
             {
@@ -342,15 +372,11 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
             SetCurrentSpinLocalYRotation(nextSpinY);
 
             bool reachedTarget = Mathf.Abs(Mathf.DeltaAngle(nextSpinY, targetSpinLocalY)) <= 0.05f;
+            isSpinInProgress = !reachedTarget;
 
             if (reachedTarget)
             {
                 SetCurrentSpinLocalYRotation(targetSpinLocalY);
-                isSpinInProgress = false;
-            }
-            else
-            {
-                isSpinInProgress = true;
             }
         }
 
@@ -369,45 +395,18 @@ namespace Entiland_VR_DAM_AJEI_2026_G_1
         {
             currentChamberIndex++;
 
-            if (currentChamberIndex >= loadedChambers.Length)
+            if (currentChamberIndex >= chambers.Length)
             {
                 currentChamberIndex = 0;
             }
         }
 
-        private bool TryInsertRound(RevolverAmmoRound ammoRound)
-        {
-            for (int offset = 0; offset < loadedChambers.Length; offset++)
-            {
-                int chamberIndex = currentChamberIndex + offset;
-                if (chamberIndex >= loadedChambers.Length)
-                {
-                    chamberIndex -= loadedChambers.Length;
-                }
-
-                if (loadedChambers[chamberIndex])
-                {
-                    continue;
-                }
-
-                loadedChambers[chamberIndex] = true;
-                ammoRound.Consume();
-                RefreshVisualBullets();
-
-                return true;
-            }
-
-            return false;
-        }
-
         private void SetReloadTriggerState(bool enabledState)
         {
-            if (reloadTrigger == null)
+            if (reloadTrigger != null)
             {
-                return;
+                reloadTrigger.enabled = enabledState;
             }
-
-            reloadTrigger.enabled = enabledState;
         }
 
         private void SetCurrentSpinLocalYRotation(float localY)
