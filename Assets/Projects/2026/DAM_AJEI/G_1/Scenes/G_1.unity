@@ -973,15 +973,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2589557952370992680, guid: c429ef14d80ce8c428216baae342287b, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -20.295
       objectReference: {fileID: 0}
     - target: {fileID: 2589557952370992680, guid: c429ef14d80ce8c428216baae342287b, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.1242
+      value: 11.1
       objectReference: {fileID: 0}
     - target: {fileID: 2589557952370992680, guid: c429ef14d80ce8c428216baae342287b, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 5.908
       objectReference: {fileID: 0}
     - target: {fileID: 2589557952370992680, guid: c429ef14d80ce8c428216baae342287b, type: 3}
       propertyPath: m_LocalRotation.w
@@ -1014,6 +1014,18 @@ PrefabInstance:
     - target: {fileID: 3891901738049271132, guid: c429ef14d80ce8c428216baae342287b, type: 3}
       propertyPath: m_Name
       value: VFX_ExplosionParticle
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394215345932511655, guid: c429ef14d80ce8c428216baae342287b, type: 3}
+      propertyPath: looping
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394215345932511655, guid: c429ef14d80ce8c428216baae342287b, type: 3}
+      propertyPath: prewarm
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8394215345932511655, guid: c429ef14d80ce8c428216baae342287b, type: 3}
+      propertyPath: playOnAwake
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
