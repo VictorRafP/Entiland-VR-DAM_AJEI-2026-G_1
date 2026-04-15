@@ -46,8 +46,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   bgmClipList:
-  - {fileID: 8300000, guid: 57996064e364241489c9b705f5a883f1, type: 3}
-  - {fileID: 8300000, guid: a01e0b14766efeb48bb16ad04d259d8d, type: 3}
+  - {fileID: 0}
+  - {fileID: 0}
   - {fileID: 0}
   sfxClipList:
   - {fileID: 8300000, guid: 43747c728b195e54bafb6f2464dce582, type: 3}
@@ -57,7 +57,12 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 6bff0636fa15ea345ab76adc169280bc, type: 3}
   - {fileID: 8300000, guid: 24a31738aebb0144b855329a03a9fbec, type: 3}
   - {fileID: 8300000, guid: 7481623a15d07a3459471cffb3144503, type: 3}
-  - {fileID: 8300000, guid: b7376b104ebb4ef46976518291d5ff00, type: 3}
+  - {fileID: 8300000, guid: fbd56fbce9780394ea117e6aa6dbf7f2, type: 3}
+  - {fileID: 8300000, guid: 112d490b9016c6444bd566edfbc619b8, type: 3}
+  - {fileID: 8300000, guid: 112d490b9016c6444bd566edfbc619b8, type: 3}
+  - {fileID: 8300000, guid: 112d490b9016c6444bd566edfbc619b8, type: 3}
+  - {fileID: 8300000, guid: bba6905013460054db088416eaf38cd6, type: 3}
+  - {fileID: 0}
   bgmMixer: {fileID: -5744906430684802906, guid: 4a7c85b361a5b8444b04300d6d7eb207, type: 2}
   sfxMixer: {fileID: 5892031596332789687, guid: 4a7c85b361a5b8444b04300d6d7eb207, type: 2}
   maxSFX: 14
@@ -76,7 +81,7 @@ AudioSource:
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
-  m_Volume: 1
+  m_Volume: 0.75
   m_Pitch: 1
   Loop: 1
   Mute: 0

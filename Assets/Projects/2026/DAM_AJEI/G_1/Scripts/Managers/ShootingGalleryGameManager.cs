@@ -244,7 +244,7 @@ namespace EntilandVR.DosCuatro.DAM_AJEI.G_Uno
 
             if (AudioManager.Instance != null)
             {
-                // AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.LOSE);
+                AudioManager.Instance.PlaySFX(AudioManager.SFX_Sounds.LOSE);
             }
         }
 
