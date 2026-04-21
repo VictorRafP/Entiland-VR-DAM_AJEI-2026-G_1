@@ -264,6 +264,14 @@ PrefabInstance:
       propertyPath: explosiveMuzzleParticles
       value: 
       objectReference: {fileID: 1977903093}
+    - target: {fileID: 1033810388445362598, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 0.01
+      objectReference: {fileID: 0}
+    - target: {fileID: 3164715160060954600, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
+      propertyPath: visibleTime
+      value: 0.1
+      objectReference: {fileID: 0}
     - target: {fileID: 4623464128438991924, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
       propertyPath: editorHand
       value: 
@@ -2848,6 +2856,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: 13c04d5c02dd4dc41ba2175e25f0d10a, type: 2}
+    - target: {fileID: 5957810347831009571, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 0.01
+      objectReference: {fileID: 0}
     - target: {fileID: 6018826085651933142, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
       propertyPath: m_LocalScale.y
       value: 18.599998
@@ -2895,6 +2907,10 @@ PrefabInstance:
     - target: {fileID: 6018826085651933142, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6105822498689301443, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
+      propertyPath: m_Parameters.widthMultiplier
+      value: 0.01
       objectReference: {fileID: 0}
     - target: {fileID: 6398764886189620588, guid: 10037eba49dd8bd4e8d118bdaaf6686f, type: 3}
       propertyPath: m_Name
