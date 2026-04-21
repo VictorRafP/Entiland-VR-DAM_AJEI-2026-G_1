@@ -879,11 +879,11 @@ PrefabInstance:
       objectReference: {fileID: 1132977081}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: respawnDelay
-      value: 20
+      value: 33
       objectReference: {fileID: 0}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: startRiseDelay
-      value: 30
+      value: 75
       objectReference: {fileID: 0}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: appearParticles
@@ -893,6 +893,10 @@ PrefabInstance:
       propertyPath: playerHitReceiver
       value: 
       objectReference: {fileID: 1132977087}
+    - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
+      propertyPath: timeBeforePlayerShot
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 1979325837062336956, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -951,7 +955,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4435853024784624264, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -12484,7 +12488,7 @@ PrefabInstance:
       objectReference: {fileID: 1132977081}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: respawnDelay
-      value: 20
+      value: 30
       objectReference: {fileID: 0}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: startRiseDelay
@@ -12498,6 +12502,10 @@ PrefabInstance:
       propertyPath: playerHitReceiver
       value: 
       objectReference: {fileID: 1132977087}
+    - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
+      propertyPath: timeBeforePlayerShot
+      value: 5
+      objectReference: {fileID: 0}
     - target: {fileID: 1979325837062336956, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: m_LocalScale.x
       value: 1
@@ -12556,7 +12564,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4435853024784624264, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -40961,8 +40969,8 @@ Transform:
   - {fileID: 1612672673}
   - {fileID: 1107206559}
   - {fileID: 1924585775}
-  - {fileID: 1012690029}
   - {fileID: 1714791116}
+  - {fileID: 1012690029}
   - {fileID: 775955904}
   m_Father: {fileID: 609461621}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -44173,12 +44181,16 @@ PrefabInstance:
     m_TransformParent: {fileID: 1597551686}
     m_Modifications:
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
+      propertyPath: scoreOnHit
+      value: 200
+      objectReference: {fileID: 0}
+    - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: playerTarget
       value: 
       objectReference: {fileID: 1132977081}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: respawnDelay
-      value: 20
+      value: 33
       objectReference: {fileID: 0}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: selectionMode
@@ -44190,7 +44202,7 @@ PrefabInstance:
       objectReference: {fileID: 2039947101}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: startRiseDelay
-      value: 20
+      value: 90
       objectReference: {fileID: 0}
     - target: {fileID: 1889492131277256508, guid: c4d17d06a772f61419225d0a3e486cfd, type: 3}
       propertyPath: appearParticles
